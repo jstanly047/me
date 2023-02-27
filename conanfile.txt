@@ -1,0 +1,10 @@
+[requires]
+gtest/1.8.1@google/stable
+cplexstudio_concert/22.1@IBM/stable
+cplexstudio_cplex/22.1@IBM/stable
+cplexstudio_cpo/22.1@IBM/stable
+jni_header/1.8.0_121@oracle/stable
+
+[generators]
+cmake_find_package
+cmake_paths
