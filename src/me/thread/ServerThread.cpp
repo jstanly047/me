@@ -15,6 +15,11 @@ constexpr int MAX_EVENT = 10;
 
 void ServerThread::start(const std::string& service)
 {
+    if (m_outputThread)
+    {
+        m_outputThread->start();
+    }
+
     int epollFd = epoll_create1(0);
 
     if (epollFd < 0) 
@@ -80,7 +85,8 @@ std::thread ServerThread::startNewThread(const std::string& service)
     return std::thread(&ServerThread::start, this, service);
 }
 
-void ServerThread::link(WorkerThread& workerThread)
+void ServerThread::linkOutput(WorkerThread& workerThread)
 {
     workerThread.setInputQueue(&m_outputMsgQueue);
+    m_outputThread = &workerThread;
 }

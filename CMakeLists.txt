@@ -42,6 +42,11 @@ file(GLOB THREAD_SRC  ./src/me/thread/*.cpp)
 add_library(me_thread STATIC ${THREAD_SRC})
 target_link_libraries(me_thread me_socket)
 
+file(GLOB BOOK_SRC ./src/me/book/*.cpp)
+add_library(book_src STATIC ${BOOK_SRC})
+target_include_directories(book_src PUBLIC ${PROJ_INC_DIR})
+#target_link_libraries(book_src me_socket)
+
 ############################################################################
 # Flags and links
 ############################################################################
@@ -49,6 +54,7 @@ add_definitions(-std=c++2a -DPROJECT_BASE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" -m64
 set(CMAKE_CXX_COMPILER /usr/bin/g++)
 set(CMAKE_CXX_FLAGS_DEBUG "-g ")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+add_compile_options(-static-libstdc++)
 
 ############################################################################
 # Build Solutions
@@ -63,5 +69,15 @@ add_executable(MEServer
 target_link_libraries(MEServer
                       me_thread)
 
+############################################################################
+# Build unit tests
+############################################################################  
+add_definitions(-DUNIT_TEST_MODE)
+file(GLOB TEST_SRC ./test/me/book/*.cpp)
 
-#target_link_libraries(BPMSEngine_${SOLUTION_LOWER})
+add_executable(me_test ./test//TestMain.cpp ${TEST_SRC})
+target_link_libraries(me_test
+                      libgtest.a
+                      -pthread)
+target_include_directories(me_test PUBLIC ${PROJ_INC_DIR})
+

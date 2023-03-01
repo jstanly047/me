@@ -9,8 +9,8 @@ namespace me { namespace socket
     public:
         BaseSocket(BaseSocket&& move) noexcept;
         BaseSocket& operator=(BaseSocket&& move) noexcept;
-        BaseSocket(BaseSocket const&)               = delete;
-        BaseSocket& operator=(BaseSocket const&)    = delete;
+        BaseSocket(const BaseSocket&)               = delete;
+        BaseSocket& operator=(const BaseSocket&)    = delete;
         ~BaseSocket();
         bool makeNonBlocking();
         bool registerEpoll(int epollFd);

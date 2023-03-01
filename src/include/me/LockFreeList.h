@@ -19,6 +19,9 @@ namespace me{
     class LockFreeList{
         public:
             LockFreeList() = default;
+            LockFreeList(const LockFreeList& rhs) = delete;
+            LockFreeList& operator=(const LockFreeList&)  = delete;
+
             ~LockFreeList()
             {
                 auto p = m_head.load();
@@ -50,6 +53,7 @@ namespace me{
                 }
                 return n;
             }
+
 
         private:
             std::atomic<Node*> m_head;

@@ -14,7 +14,7 @@ RED='\033[0;31m'
 PURPLE='\033[0;35m'
 NC='\033[0m'
 
-protoc --cpp_out=src/message --proto_path=src/protomsg src/protomsg/*.proto
+#protoc --cpp_out=src/message --proto_path=src/protomsg src/protomsg/*.proto
 mkdir -p build
 cd build
 #conan install ../

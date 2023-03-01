@@ -35,7 +35,9 @@ BaseSocket& BaseSocket::operator=(BaseSocket&& move) noexcept
 bool BaseSocket::makeNonBlocking()
 {
     int flags = fcntl(m_socketId, F_GETFL, 0);
-    if (flags == -1) {
+
+    if (flags == -1) 
+    {
         std::cerr << m_socketId << "  Error in getting status flags\n";
         return false;
     }
