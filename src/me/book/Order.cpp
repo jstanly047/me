@@ -5,6 +5,16 @@ using namespace me::book;
 
 Order::Order(){}
 
+Order::Order(unsigned long long sequence, bool isBuy, const std::string& id, double price, unsigned long long qty):
+            m_sequence(sequence),
+            m_price(price),
+            m_qty(qty),
+            m_isBuy(isBuy),
+            m_id(id)
+{
+    
+}
+
 // assume this is Sell order
 bool Order::isBuyOrderMatch(const Order& buyOrder) const
 {

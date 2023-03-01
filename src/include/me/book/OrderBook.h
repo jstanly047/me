@@ -7,6 +7,12 @@ namespace me { namespace book {
 
     class OrderMatch;
 
+    class OrderBookCallback
+    {
+    public:
+        virtual void onMatch(OrderMatch* ) = 0;
+    };
+
     template<typename OrderPtrType>
     class OrderBook
     {
@@ -21,18 +27,14 @@ namespace me { namespace book {
         };
 
     public:
-
-        class OrderBookCallback
-        {
-        public:
-            virtual void onMatch(OrderMatch* ) = 0;
-        };
-
         OrderBook(const OrderBook&) = delete;
         OrderBook operator=(const OrderBook&) = delete;
 
         OrderBook(const std::string& symbol, OrderBookCallback& callback);
         void submitOrder(OrderPtrType order);
+
+        const auto& getBids() const { return m_bids; }
+        const auto& getAsks() const { return m_asks; }
 
     private:
         std::string m_symbol;

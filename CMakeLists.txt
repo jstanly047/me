@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.16.3)
 project(ME LANGUAGES CXX)
 
 set(PROJ_INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/include")
+set(PROJ_TEST_INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/test/include")
 set(MSG_INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/message")
 #set(MOCK_INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/test/include")
 
@@ -43,8 +44,8 @@ add_library(me_thread STATIC ${THREAD_SRC})
 target_link_libraries(me_thread me_socket)
 
 file(GLOB BOOK_SRC ./src/me/book/*.cpp)
-add_library(book_src STATIC ${BOOK_SRC})
-target_include_directories(book_src PUBLIC ${PROJ_INC_DIR})
+add_library(book STATIC ${BOOK_SRC})
+target_include_directories(book PUBLIC ${PROJ_INC_DIR})
 #target_link_libraries(book_src me_socket)
 
 ############################################################################
@@ -77,7 +78,10 @@ file(GLOB TEST_SRC ./test/me/book/*.cpp)
 
 add_executable(me_test ./test//TestMain.cpp ${TEST_SRC})
 target_link_libraries(me_test
-                      libgtest.a
-                      -pthread)
-target_include_directories(me_test PUBLIC ${PROJ_INC_DIR})
+                      book
+                      -lgtest
+                      -lgmock
+                      -pthread
+                      )
+target_include_directories(me_test PUBLIC ${PROJ_INC_DIR} ${PROJ_TEST_INC_DIR})
 

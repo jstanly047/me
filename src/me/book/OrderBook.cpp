@@ -38,7 +38,7 @@ void OrderBook<OrderPtrType>::submitOrder(OrderPtrType order)
 {
     if (order->isBuy())
     {
-        for (auto askItr = m_asks.begin(); askItr != m_asks.end(); askItr++)
+        for (auto askItr = m_asks.begin(); askItr != m_asks.end(); )
         {
             if ((*askItr)->isBuyOrderMatch(*order))
             {
@@ -50,22 +50,25 @@ void OrderBook<OrderPtrType>::submitOrder(OrderPtrType order)
                 if ((*askItr)->isFullFill())
                 {
                     askItr = m_asks.erase(askItr);
+                    continue;
                 }
             }
             else
             {
                 break;
             }
+
+            askItr++;
         }
 
         if (order->isFullFill() == false)
         {
-            m_asks.emplace(std::move(order));
+            m_bids.emplace(std::move(order));
         }
     }
     else
     {
-        for (auto bidItr = m_bids.begin(); bidItr != m_bids.end(); bidItr++)
+        for (auto bidItr = m_bids.begin(); bidItr != m_bids.end(); )
         {
             if ((*bidItr)->isSellOrderMatch(*order))
             {
@@ -77,20 +80,23 @@ void OrderBook<OrderPtrType>::submitOrder(OrderPtrType order)
                 if ((*bidItr)->isFullFill())
                 {
                     bidItr = m_bids.erase(bidItr);
+                    continue;
                 }
             }
             else
             {
                 break;
             }
+
+            bidItr++;
         }
 
         if (order->isFullFill() == false)
         {
-            m_bids.emplace(std::move(order));
+            m_asks.emplace(std::move(order));
         }
     }
 }
 
-template class me::book::OrderBook<Order*>;
+template class me::book::OrderBook<me::book::Order*>;
 template class me::book::OrderBook<std::unique_ptr<Order>>;

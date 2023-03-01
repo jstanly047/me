@@ -7,10 +7,14 @@ namespace me { namespace book {
 
     class Order{
     public:
+        constexpr static bool BUY = true;
+        constexpr static bool SELL = false;
+        
         Order(const Order& ) = delete;
         Order& operator==(const Order& ) = delete;
 
         Order();
+        Order(unsigned long long sequence, bool isBuy, const std::string& id, double price, unsigned long long qty);
 
         unsigned long long getSequence() const { return m_sequence; }
         double getPrice() const { return m_price; }
@@ -30,7 +34,7 @@ namespace me { namespace book {
         unsigned long long m_sequence = 0ull;
         double m_price = 0.0;
         unsigned long long m_qty = 0ull;
-        bool m_isBuy = false;
+        bool m_isBuy = BUY;
         std::string m_id;
     };
 
