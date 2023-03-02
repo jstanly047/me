@@ -35,9 +35,6 @@ void connectToInput(const char* server, const char* service, long long int size,
         //auto order = new me::book::Order(i, isBuy,"OID" + std::to_string(i), symbols[symbolIdex], price, qty);
         auto order = std::make_unique<me::book::Order>(i, isBuy,"OID" + std::to_string(i), symbols[symbolIdex], price, qty);
         auto encodeBuffer = order->encode();
-
-        //std::cout << "Sending " << order->toString() << std::endl;
-
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
         if (connectSocket.sendMsg(encodeBuffer.first, encodeBuffer.second) == false)

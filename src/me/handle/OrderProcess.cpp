@@ -18,12 +18,10 @@ void OrderProcess::onMsg(void* msg)
         m_orderBooks[order->getSymbol()] = orderBook;
     }
 
-    std::cout <<  order->toString() << std::endl;
     orderBook->submitOrder(std::unique_ptr<me::book::Order>(order));
 }
 
 void OrderProcess::onMatch(me::book::OrderMatch *orderMatch)
 {   
-    std::cout << "onMatch ===> " <<  orderMatch->toString() << std::endl;
     sendMsgToOutput(orderMatch);
 }

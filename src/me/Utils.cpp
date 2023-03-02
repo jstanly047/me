@@ -6,9 +6,9 @@
 #include <unistd.h>
 #include <me/Utils.h>
 #include <cstdlib>
-#include <string>
-
-#define BUFSIZE 2024
+#include <fstream>
+#include <iostream>
+#include <sstream>
 
 
 void DieWithUserMessage(const char *msg, const char *detail) {
@@ -66,3 +66,23 @@ void log(const char* msg)
     
 }
 
+
+std::vector<std::vector<std::string>> parseCSV(const std::string& filename) {
+    std::ifstream file(filename);
+    std::vector<std::vector<std::string>> data;
+
+    std::string line;
+    while (std::getline(file, line)) {
+        std::vector<std::string> row;
+        std::stringstream ss(line);
+        std::string cell;
+
+        while (std::getline(ss, cell, ',')) {
+            row.push_back(cell);
+        }
+
+        data.push_back(row);
+    }
+
+    return data;
+}

@@ -67,11 +67,17 @@ add_compile_options(-static-libstdc++)
 ############################################################################
 # Build Solutions
 ############################################################################
-add_executable(MEClient
-                  ./src/MEClient.cpp)
-target_link_libraries(MEClient
+add_executable(MEAutoGenerateClient
+                  ./src/MEAutoGenerateClient.cpp)
+target_link_libraries(MEAutoGenerateClient
                       me_socket
                       book)
+
+add_executable(MEFileClient
+                      ./src/MEFileClient.cpp)
+target_link_libraries(MEFileClient
+                          me_socket
+                          book)
 
 add_executable(MEServer
                   ./src/MEServer.cpp)
