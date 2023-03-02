@@ -58,7 +58,5 @@ void WorkerThread::run()
 
 void WorkerThread::sendMsgToOutput(void* msg)
 {
-    Person* person = reinterpret_cast<Person*>(msg);
-     std::cout << std::this_thread::get_id() << " Worker sending to output " << person->name() << std::endl;
     m_outputMsgQueue.push_back(msg);
 }

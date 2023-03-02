@@ -14,6 +14,7 @@ namespace me { namespace socket
         ~BaseSocket();
         bool makeNonBlocking();
         bool registerEpoll(int epollFd);
+        bool setRecvBufferSize(int size);
 
     protected:
         BaseSocket(int socketId);

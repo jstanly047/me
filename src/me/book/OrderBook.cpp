@@ -5,8 +5,30 @@
 
 using namespace me::book;
 
-template<typename OrderPtrType>
-bool OrderBook<OrderPtrType>::AskComparator::operator()(const OrderPtrType& p1, const OrderPtrType& p2) const
+namespace
+{
+    inline bool isBuyOrderMatch(const Order& sellOrder, const Order& buyOrder)
+    {
+        if (buyOrder.getQty() != 0ull && buyOrder.getPrice() >= sellOrder.getPrice())
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    inline bool isSellOrderMatch(const Order& buyOrder, const Order& sellOrder)
+    {
+        if (sellOrder.getQty() != 0ull && sellOrder.getPrice() <= buyOrder.getPrice())
+        {
+            return true;
+        }
+
+        return false;
+    }
+}
+
+bool OrderBook::AskComparator::operator()(const std::unique_ptr<Order>& p1, const std::unique_ptr<Order>& p2) const
 {
     if (p1->getPrice() == p2->getPrice())
     {
@@ -16,8 +38,7 @@ bool OrderBook<OrderPtrType>::AskComparator::operator()(const OrderPtrType& p1, 
     return p1->getPrice() < p2->getPrice();
 }
 
-template<typename OrderPtrType>
-bool OrderBook<OrderPtrType>::BidComparator::operator()(const OrderPtrType& p1, const OrderPtrType& p2) const
+bool OrderBook::BidComparator::operator()(const std::unique_ptr<Order>& p1, const std::unique_ptr<Order>& p2) const
 {
     if (p1->getPrice() == p2->getPrice())
     {
@@ -27,20 +48,18 @@ bool OrderBook<OrderPtrType>::BidComparator::operator()(const OrderPtrType& p1, 
     return p1->getPrice() > p2->getPrice();
 }
 
-template<typename OrderPtrType>
-OrderBook<OrderPtrType>::OrderBook(const std::string& symbol, OrderBookCallback& callback):m_symbol(symbol), m_callback(callback)
+OrderBook::OrderBook(const std::string& symbol, OrderBookCallback& callback):m_symbol(symbol), m_callback(callback)
 {
     
 }
 
-template<typename OrderPtrType>
-void OrderBook<OrderPtrType>::submitOrder(OrderPtrType order)
+void OrderBook::submitOrder(std::unique_ptr<Order> order)
 {
     if (order->isBuy())
     {
         for (auto askItr = m_asks.begin(); askItr != m_asks.end(); )
         {
-            if ((*askItr)->isBuyOrderMatch(*order))
+            if (isBuyOrderMatch(**askItr, *order))
             {
                 auto orderMatch = new OrderMatch(*order, **askItr);
                 order->updateQty(*orderMatch);
@@ -70,7 +89,7 @@ void OrderBook<OrderPtrType>::submitOrder(OrderPtrType order)
     {
         for (auto bidItr = m_bids.begin(); bidItr != m_bids.end(); )
         {
-            if ((*bidItr)->isSellOrderMatch(*order))
+            if (isSellOrderMatch(**bidItr, *order))
             {
                 auto orderMatch = new OrderMatch(**bidItr, *order);
                 order->updateQty(*orderMatch);
@@ -98,5 +117,4 @@ void OrderBook<OrderPtrType>::submitOrder(OrderPtrType order)
     }
 }
 
-template class me::book::OrderBook<me::book::Order*>;
-template class me::book::OrderBook<std::unique_ptr<Order>>;
+//template class me::book::OrderBook<std::unique_ptr<Order>;

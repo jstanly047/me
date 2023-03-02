@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package message;
+
+message OrderMatch {
+  string symbol = 1;
+  string sellOrderId = 2;
+  double askPrice = 3;
+  uint64 matchedQuantity = 4;
+  string buyOrderId = 5;
+  double bidPrice = 6;
+}

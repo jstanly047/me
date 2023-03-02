@@ -7,7 +7,7 @@
 #include <array>
 #include <sys/epoll.h>
 #include <iostream>
-#include <test.pb.h>
+#include <me/book/Order.h>
 
 using namespace me::thread;
 
@@ -43,7 +43,7 @@ void ServerThread::start(const std::string& service)
 
     std::array<struct epoll_event, MAX_EVENT> events;
 
-    while (true) 
+    for(;;) 
     {
         int n = epoll_wait(epollFd, events.data(), MAX_EVENT, -1);
 
@@ -54,7 +54,7 @@ void ServerThread::start(const std::string& service)
                 if ((events[i].events & EPOLLERR) ||
                     !(events[i].events & EPOLLIN))
                 {
-                    //?? Need to check further
+                    std::cout << "Unhandled !!!" << std::endl;
                     continue;
                 }
 
@@ -72,9 +72,19 @@ void ServerThread::start(const std::string& service)
                     continue;
                 }
 
-                auto person = dataSocket->getNextMessage();
-                std::cout << std::this_thread::get_id() << " send msg person " << person->name() << std::endl;
-                m_outputMsgQueue.push_back(person);
+                for (;;)
+                {
+                    auto endCodeOrder = dataSocket->getNextMessage();
+
+                    if (endCodeOrder.first == nullptr)
+                    {
+                        break;
+                    }
+
+                    me::book::Order* order = me::book::Order::decode(endCodeOrder.first, endCodeOrder.second);
+                    delete[] endCodeOrder.first;
+                    m_outputMsgQueue.push_back(order);
+                }
             }
         }
     }

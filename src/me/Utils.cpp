@@ -5,6 +5,8 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <me/Utils.h>
+#include <cstdlib>
+#include <string>
 
 #define BUFSIZE 2024
 
@@ -63,3 +65,4 @@ void log(const char* msg)
 {
     
 }
+

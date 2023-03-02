@@ -1,6 +1,7 @@
 #pragma once
 
 #include <set>
+#include <memory>
 #include "Order.h"
 
 namespace me { namespace book {
@@ -13,17 +14,16 @@ namespace me { namespace book {
         virtual void onMatch(OrderMatch* ) = 0;
     };
 
-    template<typename OrderPtrType>
     class OrderBook
     {
         struct AskComparator
         {
-            bool operator()(const OrderPtrType& p1, const OrderPtrType& p2) const;
+            bool operator()(const std::unique_ptr<Order>& p1, const std::unique_ptr<Order>& p2) const;
         };
 
         struct BidComparator
         {
-            bool operator()(const OrderPtrType& p1, const OrderPtrType& p2) const;
+            bool operator()(const std::unique_ptr<Order>& p1, const std::unique_ptr<Order>& p2) const;
         };
 
     public:
@@ -31,15 +31,15 @@ namespace me { namespace book {
         OrderBook operator=(const OrderBook&) = delete;
 
         OrderBook(const std::string& symbol, OrderBookCallback& callback);
-        void submitOrder(OrderPtrType order);
+        void submitOrder(std::unique_ptr<Order> order);
 
         const auto& getBids() const { return m_bids; }
         const auto& getAsks() const { return m_asks; }
 
     private:
         std::string m_symbol;
-        std::set<OrderPtrType, BidComparator> m_bids;
-        std::set<OrderPtrType, AskComparator> m_asks;
+        std::set<std::unique_ptr<Order>, BidComparator> m_bids;
+        std::set<std::unique_ptr<Order>, AskComparator> m_asks;
         OrderBookCallback& m_callback;
     };
 }}

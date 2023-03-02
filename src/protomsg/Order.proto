@@ -1,0 +1,11 @@
+syntax = "proto3";
+package message;
+
+message Order {
+  uint64 sequence = 1;
+  double price = 2;
+  uint64 qty = 3;
+  bool isBuy = 4;
+  string id = 5;
+  string symbol = 6;
+}

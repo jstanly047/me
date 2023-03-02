@@ -5,6 +5,7 @@
 #include<stdio.h>
 #include <me/Utils.h>
 #include <test.pb.h>
+#include <iostream>
 
 using namespace me::socket;
 
@@ -13,7 +14,7 @@ DataSocket::DataSocket(int socketID) : BaseSocket(socketID)
 {
 }
 
-bool DataSocket::sendMsg(const std::string& message)
+bool DataSocket::sendMsg(uint8_t* buffer, uint32_t size)
 {
     if (m_socketId == NULL_SOCKET)
     {
@@ -35,53 +36,72 @@ bool DataSocket::sendMsg(const std::string& message)
 
         return true;
     };
-
-    Person personMsg;
-    personMsg.set_name(message.c_str());
     
-    uint32_t msgBytesSize =  (uint32_t) personMsg.ByteSizeLong();
-    uint32_t networkByteOrderMsgBytesSize = htonl(msgBytesSize);
+    uint32_t networkByteOrderMsgBytesSize = htonl(size);
     sendMessage(&networkByteOrderMsgBytesSize, sizeof(uint32_t));
-    std::vector<char> messageBytes;
-    messageBytes.reserve(msgBytesSize);
-    personMsg.SerializeToArray(messageBytes.data(), msgBytesSize);
-    sendMessage(messageBytes.data(), msgBytesSize);
+    sendMessage(buffer, size);
     return true;
 }
 
-Person* DataSocket::getNextMessage()
+std::pair<uint8_t*, uint32_t>  DataSocket::getNextMessage()
 {
-    auto receiveMsg = [&](uint8_t* buf, size_t size)->bool
+    auto receiveMsg = [&](uint8_t* buf, size_t size, uint32_t& readCount)->bool
     {
-        size_t totalBytesRcvd = 0;
-
-        while (totalBytesRcvd < size)
+        while (readCount < size)
         {
-            uint8_t* receiveBuffer = buf + totalBytesRcvd;
-            ssize_t numBytesRecv = recv(m_socketId, receiveBuffer, size - totalBytesRcvd, 0);
+            uint8_t* receiveBuffer = buf + readCount;
+            ssize_t numBytesRecv = recv(m_socketId, receiveBuffer, size - readCount, MSG_DONTWAIT);
         
             if (numBytesRecv < 0)
             {
-                DieWithSystemMessage("recv() failed");
+                if (errno == EAGAIN || errno == EWOULDBLOCK)
+                {
+                    return false;
+                }
+                else
+                {
+                    std:: cout << "recv() failed" << std::endl;
+                    return false;
+                }
             }
             else if (numBytesRecv == 0)
             {
-                DieWithUserMessage("recv()", "connection closed prematurely");
+                std::cout << "recv() connection closed prematurely" << std::endl;
+                return false;
             }
 
-            totalBytesRcvd += numBytesRecv;
+            readCount += numBytesRecv;
         }
 
         return true;
     };
 
-    uint32_t networkByteOrderMsgBytesSize;
-    receiveMsg(reinterpret_cast<uint8_t*>(&networkByteOrderMsgBytesSize), sizeof(uint32_t));
-    uint32_t msgByteSize = ntohl(networkByteOrderMsgBytesSize);
-    uint8_t* megBuffer = new uint8_t[msgByteSize];
-    receiveMsg(megBuffer, msgByteSize);
-    Person* personMsg = new Person();
-    personMsg->ParseFromArray(megBuffer, msgByteSize);
-    delete[] megBuffer;
-    return personMsg;
+    
+    if (m_isSizeDataRead == false)
+    {
+        bool isReadFully = receiveMsg(reinterpret_cast<uint8_t*>(&m_networkByteOrderMsgBytesSize), sizeof(uint32_t), m_receivedSizeDataCount);
+
+        if (isReadFully == false)
+        {
+            //std::cout << "size size read " <<  m_receivedSizeDataCount
+            return {nullptr, 0};
+        }
+        
+        m_isSizeDataRead = true;
+        m_receivedSizeDataCount = 0;
+        m_expectedMsgSize = ntohl(m_networkByteOrderMsgBytesSize);
+        m_networkByteOrderMsgBytesSize = 0;
+        m_msgBuffer = new uint8_t[m_expectedMsgSize];
+    }
+    
+    bool isReadFully = receiveMsg(m_msgBuffer, m_expectedMsgSize, m_receivedMsgDataCount);
+
+    if (isReadFully == false)
+    {
+        return {nullptr, 0};
+    }
+
+    m_isSizeDataRead = false;
+    m_receivedMsgDataCount = 0;
+    return {m_msgBuffer,  m_expectedMsgSize};
 }

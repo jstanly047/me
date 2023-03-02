@@ -29,6 +29,8 @@ file(GLOB MSG_SRC  ./src/message/*.cc)
 add_library(msg STATIC ${MSG_SRC})
 target_link_libraries(msg protobuf::libprotobuf)
 target_include_directories(msg PUBLIC ${MSG_INC_DIR} ${Protobuf_INCLUDE_DIRS})
+target_compile_options(msg PRIVATE -Wno-error=array-bounds)
+
 
 file(GLOB ME_SRC  ./src/me/*.cpp)
 add_library(me STATIC ${ME_SRC})
@@ -45,8 +47,13 @@ target_link_libraries(me_thread me_socket)
 
 file(GLOB BOOK_SRC ./src/me/book/*.cpp)
 add_library(book STATIC ${BOOK_SRC})
-target_include_directories(book PUBLIC ${PROJ_INC_DIR})
-#target_link_libraries(book_src me_socket)
+target_include_directories(book PUBLIC ${PROJ_INC_DIR} ${MSG_INC_DIR})
+target_link_libraries(book msg)
+
+file(GLOB HANDLE_SRC ./src/me/handle/*.cpp)
+add_library(handle STATIC ${HANDLE_SRC})
+target_include_directories(handle PUBLIC ${PROJ_INC_DIR})
+target_link_libraries(handle book)
 
 ############################################################################
 # Flags and links
@@ -63,12 +70,15 @@ add_compile_options(-static-libstdc++)
 add_executable(MEClient
                   ./src/MEClient.cpp)
 target_link_libraries(MEClient
-                      me_socket)
+                      me_socket
+                      book)
 
 add_executable(MEServer
                   ./src/MEServer.cpp)
+
 target_link_libraries(MEServer
-                      me_thread)
+                      me_thread
+                      handle)
 
 ############################################################################
 # Build unit tests
@@ -76,7 +86,7 @@ target_link_libraries(MEServer
 add_definitions(-DUNIT_TEST_MODE)
 file(GLOB TEST_SRC ./test/me/book/*.cpp)
 
-add_executable(me_test ./test//TestMain.cpp ${TEST_SRC})
+add_executable(me_test ./test/TestMain.cpp ${TEST_SRC})
 target_link_libraries(me_test
                       book
                       -lgtest
@@ -84,4 +94,10 @@ target_link_libraries(me_test
                       -pthread
                       )
 target_include_directories(me_test PUBLIC ${PROJ_INC_DIR} ${PROJ_TEST_INC_DIR})
+
+
+add_executable(PerfTestOrderBook ./test/perf/PerfTestOrderBook.cpp)
+target_link_libraries(PerfTestOrderBook
+                      book
+                      )
 

@@ -5,7 +5,7 @@
 #include <array>
 #include <sys/epoll.h>
 #include <iostream>
-#include <test.pb.h>
+#include <me/book/OrderMatch.h>
 
 using namespace me::thread;
 
@@ -79,10 +79,11 @@ void AccumulatorThread::sendToClient(me::socket::DataSocket& dataSocket)
     {
         for (;;)
         {
-            Person* person = reinterpret_cast<Person*>(inputQueue->pop());
-            std::cout << std::this_thread::get_id() << " AccumulatorThread Got " << person->name() << std::endl;
-            dataSocket.sendMsg(person->name());
-            delete person;
+            auto orderMatch = reinterpret_cast<me::book::OrderMatch*>(inputQueue->pop());
+            std::cout << std::this_thread::get_id() << " AccumulatorThread match " << orderMatch->getBuyOrderID() << ":" << orderMatch->getSellOrderID() << std::endl;
+            auto encodeBuffer = orderMatch->encode();
+            dataSocket.sendMsg(encodeBuffer.first, encodeBuffer.second);
+            delete[] encodeBuffer.first;
         }
     }
 }

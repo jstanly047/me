@@ -3,18 +3,8 @@
 #include <me/thread/ServerThread.h>
 #include <me/thread/WorkerThread.h>
 #include <me/thread/AccumulatorThread.h>
+#include <me/handle/OrderProcess.h>
 #include <test.pb.h>
-
-class PersonMsgReader : public me::thread::WorkerThreadCallback
-{
-private:
-    void onMsg(void* msg) override
-    {
-        Person* person = reinterpret_cast<Person*>(msg);
-        std::cout << std::this_thread::get_id() << " Worker Got " << person->name() << std::endl;
-        sendMsgToOutput(msg);
-    }
-};
 
 
 int main(int argc, char *argv[]) 
@@ -24,9 +14,9 @@ int main(int argc, char *argv[])
         DieWithUserMessage("Parameter(s)", "<In Server Port/Service> <Out Server Port/Service>");
     }
 
-    PersonMsgReader msgReader;
+    me::handle::OrderProcess orderProcess;
     me::thread::ServerThread serverThread;
-    me::thread::WorkerThread workerThread(msgReader);
+    me::thread::WorkerThread workerThread(orderProcess);
     me::thread::AccumulatorThread accumulatorThread(argv[2]);
 
     serverThread.linkOutput(workerThread);

@@ -4,6 +4,7 @@
 #include <condition_variable>
 #include <atomic>
 #include <cassert>
+#include <iostream>
 #include "LockFreeList.h"
 
 

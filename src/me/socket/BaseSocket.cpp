@@ -4,6 +4,7 @@
 #include <sys/epoll.h>
 #include <iostream>
 #include <me/Utils.h>
+#include <sys/socket.h>
 
 using namespace me::socket;
 
@@ -58,4 +59,14 @@ bool BaseSocket::registerEpoll(int epollFd)
     event.events = EPOLLIN | EPOLLET;
     event.data.ptr = this;
     return epoll_ctl(epollFd, EPOLL_CTL_ADD, m_socketId, &event) == 0;
+}
+
+bool BaseSocket::setRecvBufferSize(int size)
+{
+    if (setsockopt(m_socketId, SOL_SOCKET, SO_RCVBUF, &size, sizeof(size)) == -1) 
+    {
+        return false;
+    }
+
+    return true;
 }
