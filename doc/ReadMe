@@ -61,6 +61,7 @@ Will give "All Passed" on expected result, else it will fail.
 Ex:
 $/dist/bin/MEFileClient localhost 8080 8081 test/fileInputs/InputOrderFile test/fileInputs/OutputOrderMatch
 
+Example file is in source test/fileInputs
 
 
 ===================================================================================
@@ -90,3 +91,12 @@ Run Auto Generated Order
 This will generate orders as per the command line request. 
 Ex:
 $ ./dist/bin/MEAutoGenerateClient localhost 8080 8081 1000 5
+
+
+===================================================================================
+Run Perf For OrderBook
+===================================================================================
+./dist/bin/PerfTestOrderBook <Number of Orders> <Number Of Iteration>
+
+Ex:
+./dist/bin/PerfTestOrderBook 1000 5
