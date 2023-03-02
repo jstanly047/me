@@ -1,0 +1,92 @@
+===================================================================================
+C++ Standard
+===================================================================================
+C++20
+
+
+===================================================================================
+Compiler & Depended Library Version (same or higher)
+===================================================================================
+g++      9.4
+cmake    3.16
+protobuf 3.6.1
+
+
+
+===================================================================================
+Install Pre-request
+===================================================================================
+sudo apt-get install g++
+sudo apt-get install cmake
+sudo apt-get install libgtest-dev libgmock-dev
+sudo apt-get install libprotobuf-dev protobuf-compiler
+
+
+===================================================================================
+How To Build
+===================================================================================
+From the root folder run bellow command
+
+$sh build.sh Release
+
+It will generate binaries in dis/bin folder
+
+
+===================================================================================
+Run Unit Test
+===================================================================================
+$./dist/bin/me_test
+
+
+
+===================================================================================
+Run BE Engine
+===================================================================================
+./dist/bin/MEServer <In Server Port/Service> <Out Server Port/Service>
+
+Ex:
+Run below to up upstream service in 8080 and downstream service in 8081
+$./dist/bin/MEServer 8080 8081
+
+
+
+===================================================================================
+Testing BE Engine
+===================================================================================
+Place order And Verify the order by running.
+/dist/bin/MEFileClient <Server Address/Name> <In Server Port/Service> <Out Server Port/Service> <Input Order File> <Match Validation File>
+
+Will give "All Passed" on expected result, else it will fail.
+
+Ex:
+$/dist/bin/MEFileClient localhost 8080 8081 test/fileInputs/InputOrderFile test/fileInputs/OutputOrderMatch
+
+
+
+===================================================================================
+Order File Format
+===================================================================================
+<BUY/SELL>,<OrderID>,<Symbol>,<Price>,<Qty>
+
+Ex:
+BUY,BID1,IBM,10.0,15
+SELL,SID4,IBM,10.0,10
+
+
+===================================================================================
+Order Match File Format
+===================================================================================
+<Symbol>,<SellOrderID>,<AskPrice>,<QtyMatched>,<BuyOrderID>,<BidPrice>
+
+Ex:
+IBM,SID4,10.0,10,BID1,10.0
+
+
+===================================================================================
+Run Auto Generated Order
+===================================================================================
+/dist/bin/MEAutoGenerateClient  <In Server Address/Name> <In Server Port/Service> <Out Server Port/Service> <Number of Orders> <Number Of Symbol>
+
+This will generate orders as per the command line request. 
+Ex:
+$ ./dist/bin/MEAutoGenerateClient localhost 8080 8081 1000 5

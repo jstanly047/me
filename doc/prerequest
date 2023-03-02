@@ -1,3 +1,0 @@
-sudo apt-get install g++ (9.4 or higher)
-sudo apt-get install libgtest-dev libgmock-dev
-sudo apt-get install libprotobuf-dev protobuf-compiler
