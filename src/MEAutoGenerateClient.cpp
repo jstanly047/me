@@ -95,7 +95,6 @@ void connectToOutput(const char* server, const char* service)
             }
 
             auto orderMatch = me::book::OrderMatch::decode(encodeBuffer.first, encodeBuffer.second);
-            delete[] encodeBuffer.first;
             std::cout << "Received Match : " << orderMatch->getSellOrderID() << ":" << orderMatch->getBuyOrderID() << std::endl;
             delete orderMatch;
         }

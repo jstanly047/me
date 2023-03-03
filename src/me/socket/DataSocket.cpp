@@ -91,7 +91,6 @@ std::pair<uint8_t*, uint32_t>  DataSocket::getNextMessage()
         m_receivedSizeDataCount = 0;
         m_expectedMsgSize = ntohl(m_networkByteOrderMsgBytesSize);
         m_networkByteOrderMsgBytesSize = 0;
-        m_msgBuffer = new uint8_t[m_expectedMsgSize];
     }
     
     bool isReadFully = receiveMsg(m_msgBuffer, m_expectedMsgSize, m_receivedMsgDataCount);

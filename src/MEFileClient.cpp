@@ -106,7 +106,6 @@ void connectToOutput(const char* server, const char* service, const std::string&
                 isPassed = false;
             }
             ++rowItr;
-            delete[] encodeBuffer.first;
             delete orderMatch;
 
             if (rowItr == rows.end())

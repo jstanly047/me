@@ -82,7 +82,6 @@ void ServerThread::start(const std::string& service)
                     }
 
                     me::book::Order* order = me::book::Order::decode(endCodeOrder.first, endCodeOrder.second);
-                    delete[] endCodeOrder.first;
                     m_outputMsgQueue.push_back(order);
                 }
             }

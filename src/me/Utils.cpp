@@ -86,3 +86,17 @@ std::vector<std::vector<std::string>> parseCSV(const std::string& filename) {
 
     return data;
 }
+
+
+using namespace me;
+
+void TimerClock::begin()
+{
+    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &m_start);
+}
+
+long long int TimerClock::end()
+{
+    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &m_end);
+    return (m_end.tv_sec - m_start.tv_sec) * 1000000000 + (m_end.tv_nsec - m_start.tv_nsec);
+}
