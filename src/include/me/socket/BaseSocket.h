@@ -28,6 +28,8 @@ namespace me { namespace socket
         bool setSendTimeOut(const struct timeval &timeout);
         bool setDataFlushTimeoutOnClose(int waitTimeInSec);
         bool setTCPKeepAlive(int maxIdleTime, int interval, int numberOfTry);
+        bool setBufferTCPSendData();
+        bool setMaxSendDataWaitThreshold(int numberOfBytes);
 
     protected:
         BaseSocket(int socketId);
