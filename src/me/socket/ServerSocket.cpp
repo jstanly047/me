@@ -52,6 +52,7 @@ bool ServerSocket::setUpTCP()
             fputs("Binding to ", stdout);
             PrintSocketAddress((struct sockaddr *) &localAddr, stdout);
             fputc('\n', stdout);
+            setSocketDescriptorFlags();
             break;
         }
 

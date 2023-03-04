@@ -28,13 +28,12 @@ void ServerThread::start(const std::string& service)
     }
 
     me::socket::ServerSocket serverSocket(service);
+    serverSocket.setNonBlocking();
 
     if (serverSocket.setUpTCP() == false)
     {
         DieWithUserMessage(__func__, "SetupTCPServerSocket() failed");
     }
-
-    serverSocket.makeNonBlocking();
 
     if (serverSocket.registerEpoll(epollFd) == false) 
     {

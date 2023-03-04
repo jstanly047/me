@@ -47,13 +47,12 @@ void AccumulatorThread::run()
     }
 
     m_serverSocket = new me::socket::ServerSocket(m_service);
+    m_serverSocket->setNonBlocking();
 
     if (m_serverSocket->setUpTCP() == false)
     {
         DieWithUserMessage(__func__, "SetupTCPServerSocket() failed");
     }
-
-    m_serverSocket->makeNonBlocking();
 
     if (m_serverSocket->registerEpoll(m_epollFd) == false) 
     {

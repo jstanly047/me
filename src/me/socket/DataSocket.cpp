@@ -23,11 +23,18 @@ bool DataSocket::sendMsg(uint8_t* buffer, uint32_t size)
 
     auto sendMessage = [&](const void* buf, size_t size)
     {
-        ssize_t numBytesSend = send(m_socketId, buf, size, 0);
+        ssize_t numBytesSend = send(m_socketId, buf, size, MSG_DONTWAIT);
     
         if (numBytesSend < 0)
         {
-            DieWithSystemMessage("send() failed");
+            if (errno == EAGAIN || errno == EWOULDBLOCK)
+            {
+                return false;
+            }
+            else
+            {
+                DieWithSystemMessage("send() failed");
+            }
         }
         else if (numBytesSend != (ssize_t) size)
         {
