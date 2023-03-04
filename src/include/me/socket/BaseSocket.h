@@ -19,8 +19,8 @@ namespace me { namespace socket
         bool setRecvBufferSize(int size);
         bool setSendBufferSize(int size);
         bool setReuseAddAndPort();
-        bool setCoalescing();
-        bool setNoDelay();
+        bool setTCPMaxSendRate(unsigned long long int rateInBitPerSec);
+        bool setTCPNoDelay();
         bool setKeepAlive();
         bool setMinimumDataToReturnRecv(int numberOfBytes);
         bool setMinimumDataToReturnSend(int numberOfBytes);
@@ -30,6 +30,9 @@ namespace me { namespace socket
         bool setTCPKeepAlive(int maxIdleTime, int interval, int numberOfTry);
         bool setBufferTCPSendData();
         bool setMaxSendDataWaitThreshold(int numberOfBytes);
+
+        int getRcvBufferSize() const;
+        int getSendBufferSize() const;
 
     protected:
         BaseSocket(int socketId);

@@ -60,10 +60,9 @@ bool BaseSocket::setReuseAddAndPort()
     return true;
 }
 
-bool BaseSocket::setCoalescing()
+bool BaseSocket::setTCPMaxSendRate(unsigned long long int rateInBitPerSec)
 {
-    int flag = 1;
-    if (setsockopt(m_socketId, SOL_SOCKET, SO_MAX_PACING_RATE, &flag, sizeof(flag)) == -1) 
+    if (setsockopt(m_socketId, SOL_SOCKET, SO_MAX_PACING_RATE, &rateInBitPerSec, sizeof(rateInBitPerSec)) == -1) 
     {
         return false;
     }
@@ -71,10 +70,10 @@ bool BaseSocket::setCoalescing()
     return true;
 }
 
-bool BaseSocket::setNoDelay()
+bool BaseSocket::setTCPNoDelay()
 {
     int flag = 1;
-    if (setsockopt(m_socketId, SOL_SOCKET, SO_MAX_PACING_RATE, &flag, sizeof(flag)) == -1) 
+    if (setsockopt(m_socketId, SOL_SOCKET, TCP_NODELAY, &flag, sizeof(flag)) == -1) 
     {
         return false;
     }
@@ -100,6 +99,30 @@ bool BaseSocket::setSendBufferSize(int size)
     }
 
     return true;
+}
+
+int BaseSocket::getRcvBufferSize() const
+{
+    int size;
+    socklen_t len = sizeof(size);
+    if (getsockopt(m_socketId, SOL_SOCKET, SO_RCVBUF, &size, &len) == -1)
+    {
+        return -1;
+    }
+
+    return size;
+}
+
+int BaseSocket::getSendBufferSize() const
+{
+    int size;
+    socklen_t len = sizeof(size);
+    if (getsockopt(m_socketId, SOL_SOCKET, SO_SNDBUF, &size, &len) == -1)
+    {
+        return -1;
+    }
+
+    return size;
 }
 
 bool BaseSocket::setKeepAlive()

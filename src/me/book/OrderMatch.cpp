@@ -39,6 +39,7 @@ OrderMatch* OrderMatch::decode(uint8_t* megBuffer, uint32_t size)
 
 std::pair<uint8_t*, uint32_t> OrderMatch::encode() const
 {
+    thread_local uint8_t orderMatchMsgBuffer[128];
     message::OrderMatch orderMatch;
     orderMatch.set_symbol(m_symbol);
     orderMatch.set_sellorderid(m_sellOrderId);
@@ -48,9 +49,8 @@ std::pair<uint8_t*, uint32_t> OrderMatch::encode() const
     orderMatch.set_bidprice(m_bidPrice);
     
     uint32_t msgBytesSize =  (uint32_t) orderMatch.ByteSizeLong();
-    uint8_t* buffer = new uint8_t[msgBytesSize];
-    orderMatch.SerializeToArray(buffer, msgBytesSize);
-    return {buffer, msgBytesSize};
+    orderMatch.SerializeToArray(orderMatchMsgBuffer, msgBytesSize);
+    return {orderMatchMsgBuffer, msgBytesSize};
 }
 
 std::string OrderMatch::toString() const

@@ -29,6 +29,7 @@ void ServerThread::start(const std::string& service)
 
     me::socket::ServerSocket serverSocket(service);
     serverSocket.setNonBlocking();
+    serverSocket.setReuseAddAndPort();
 
     if (serverSocket.setUpTCP() == false)
     {

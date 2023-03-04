@@ -27,6 +27,7 @@ Order* Order::decode(uint8_t* megBuffer, uint32_t size)
 
 std::pair<uint8_t*, uint32_t> Order::encode() const
 {
+    thread_local uint8_t orderMsgBuffer[64];
     message::Order order;
     order.set_sequence(m_sequence);
     order.set_price(m_price);
@@ -36,9 +37,8 @@ std::pair<uint8_t*, uint32_t> Order::encode() const
     order.set_symbol(m_symbol);
     
     uint32_t msgBytesSize =  (uint32_t) order.ByteSizeLong();
-    uint8_t* buffer = new uint8_t[msgBytesSize];
-    order.SerializeToArray(buffer, msgBytesSize);
-    return {buffer, msgBytesSize};
+    order.SerializeToArray(orderMsgBuffer, msgBytesSize);
+    return {orderMsgBuffer, msgBytesSize};
 }
 
 void Order::updateQty(const OrderMatch& orderMatch)

@@ -21,6 +21,6 @@ namespace me{ namespace socket
         
         uint32_t m_receivedMsgDataCount = 0;
         uint32_t m_expectedMsgSize = 0;
-        uint8_t m_msgBuffer[64];
+        uint8_t m_msgBuffer[120];
     };
 }}

@@ -6,7 +6,7 @@
 #include <me/book/Order.h>
 #include <me/book/OrderMatch.h>
 #include <sys/epoll.h>
-
+#include <me/utility/TimerClock.h>
 
 void connectToInput(const char* server, const char* service, long long int size, int numberOfSymbol)
 {
@@ -25,6 +25,9 @@ void connectToInput(const char* server, const char* service, long long int size,
         symbols.push_back("SYM" + std::to_string(i));
     }
 
+    me::utility::TimerClock totalTime("Encode and Send Orders");
+    me::utility::AccumulateAndAverage sendTime("Time Took Send Order");
+    totalTime.begin();
     for (long long int i =0; i < size; i++)
     {
         bool isBuy = (i % 2) == 0;
@@ -35,15 +38,36 @@ void connectToInput(const char* server, const char* service, long long int size,
         //auto order = new me::book::Order(i, isBuy,"OID" + std::to_string(i), symbols[symbolIdex], price, qty);
         auto order = std::make_unique<me::book::Order>(i, isBuy,"OID" + std::to_string(i), symbols[symbolIdex], price, qty);
         auto encodeBuffer = order->encode();
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        sendTime.begin();
 
         if (connectSocket.sendMsg(encodeBuffer.first, encodeBuffer.second) == false)
         {
             DieWithSystemMessage("send() failed");
         }
-
-        delete[] encodeBuffer.first;
+        sendTime.end(encodeBuffer.second);
     }
+
+    auto order = std::make_unique<me::book::Order>(size + 1, me::book::Order::BUY,"END1", "END", 1.0, 1);
+    auto encodeBuffer = order->encode();
+    sendTime.begin();
+    if (connectSocket.sendMsg(encodeBuffer.first, encodeBuffer.second) == false)
+    {
+        DieWithSystemMessage("send() failed");
+    }
+    sendTime.end(encodeBuffer.second);
+
+    order = std::make_unique<me::book::Order>(size + 2, me::book::Order::SELL,"END2", "END", 1.0, 1);
+    encodeBuffer = order->encode();
+    sendTime.begin();
+    if (connectSocket.sendMsg(encodeBuffer.first, encodeBuffer.second) == false)
+    {
+        DieWithSystemMessage("send() failed");
+    }
+    sendTime.end(encodeBuffer.second);
+    totalTime.end();
+
+    std::cout << totalTime.getStatInMilliSec() << std::endl;
+    std::cout << sendTime.getStatInMilliSec() << std::endl;
 
     std::string exitStr;
     std::cin >> exitStr;
@@ -72,6 +96,11 @@ void connectToOutput(const char* server, const char* service)
 
     std::array<struct epoll_event, 1> events;
 
+    me::utility::TimerClock receiveTime("Receive Order");
+    receiveTime.begin();
+
+    bool breakWait = false;
+
     for (;;)
     {
         epoll_wait(epollFd, events.data(), 1, -1);
@@ -95,10 +124,20 @@ void connectToOutput(const char* server, const char* service)
             }
 
             auto orderMatch = me::book::OrderMatch::decode(encodeBuffer.first, encodeBuffer.second);
-            std::cout << "Received Match : " << orderMatch->getSellOrderID() << ":" << orderMatch->getBuyOrderID() << std::endl;
+
+            breakWait = (orderMatch->getSymbol()  == "END");
+           // std::cout << "Received Match : " << orderMatch->getSellOrderID() << ":" << orderMatch->getBuyOrderID() << std::endl;
             delete orderMatch;
         }
+
+        if (breakWait)
+        {
+            break;
+        }
     }
+
+    receiveTime.end();
+    std::cout << receiveTime.getStatInMilliSec() << std::endl;
 }
 
 int main(int argc, char *argv[]) 

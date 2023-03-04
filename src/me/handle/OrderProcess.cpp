@@ -9,6 +9,17 @@ using namespace me::handle;
 void OrderProcess::onMsg(void* msg)
 {
     auto order = reinterpret_cast<me::book::Order*>(msg);
+    
+
+    if (order->getSequence() == 1)
+    {
+        m_totalTime.begin();
+    }
+    else if (order->getID() == "END2")
+    {
+        m_totalTime.end();
+        std::cout << m_totalTime.getStatInMilliSec() << std::endl;
+    }
 
     auto orderBook = m_orderBooks[order->getSymbol()];
 

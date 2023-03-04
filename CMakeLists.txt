@@ -31,6 +31,9 @@ target_link_libraries(msg protobuf::libprotobuf)
 target_include_directories(msg PUBLIC ${MSG_INC_DIR} ${Protobuf_INCLUDE_DIRS})
 target_compile_options(msg PRIVATE -Wno-error=array-bounds)
 
+file(GLOB UTILITY_SRC  ./src/me/utility/*.cpp)
+add_library(utility STATIC ${UTILITY_SRC})
+target_include_directories(utility PUBLIC ${PROJ_INC_DIR})
 
 file(GLOB ME_SRC  ./src/me/*.cpp)
 add_library(me STATIC ${ME_SRC})
@@ -71,7 +74,8 @@ add_executable(MEAutoGenerateClient
                   ./src/MEAutoGenerateClient.cpp)
 target_link_libraries(MEAutoGenerateClient
                       me_socket
-                      book)
+                      book
+                      utility)
 
 add_executable(MEFileClient
                       ./src/MEFileClient.cpp)
@@ -84,7 +88,8 @@ add_executable(MEServer
 
 target_link_libraries(MEServer
                       me_thread
-                      handle)
+                      handle
+                      utility)
 
 ############################################################################
 # Build unit tests

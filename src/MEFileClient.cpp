@@ -22,8 +22,6 @@ void sendOrdersFromFile(me::socket::ConnectSocket& connectSocket, const std::str
         {
             DieWithSystemMessage("send() failed");
         }
-
-        delete[] encodeBuffer.first;
     }
 }
 

@@ -116,7 +116,6 @@ void AccumulatorThread::sendToClient(me::socket::DataSocket& dataSocket)
             auto orderMatch = reinterpret_cast<me::book::OrderMatch*>(inputQueue->pop());
             auto encodeBuffer = orderMatch->encode();
             dataSocket.sendMsg(encodeBuffer.first, encodeBuffer.second);
-            delete[] encodeBuffer.first;
             delete orderMatch;
         }
     }
