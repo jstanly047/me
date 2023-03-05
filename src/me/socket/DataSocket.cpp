@@ -7,6 +7,7 @@
 #include <test.pb.h>
 #include <iostream>
 #include <cstring>
+#include <sys/sendfile.h>
 
 using namespace me::socket;
 
@@ -83,6 +84,19 @@ bool DataSocket::sendMsg(uint8_t* buffer, uint32_t size)
     uint32_t networkByteOrderMsgBytesSize = htonl(size);
     sendMessage(&networkByteOrderMsgBytesSize, sizeof(uint32_t));
     sendMessage(buffer, size);
+    return true;
+}
+
+bool DataSocket::sendFile(int fileDescriptor, uint32_t size)
+{
+    off_t offset = 0;
+    ssize_t sendBytes = sendfile(m_socketId, fileDescriptor, &offset, size);
+
+    if (sendBytes == -1) 
+    {
+        return false;
+    }
+
     return true;
 }
 

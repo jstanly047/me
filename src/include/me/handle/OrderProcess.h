@@ -19,5 +19,6 @@ namespace me { namespace handle {
         std::unordered_map<std::string, me::book::OrderBook*> m_orderBooks;
 
         me::utility::TimerClock m_totalTime = me::utility::TimerClock("Worker Received Orders");
+        unsigned long long int m_count = 0;
     };
 }}

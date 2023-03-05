@@ -14,6 +14,7 @@ namespace me{ namespace socket
         DataSocket(int socketID);
 
         bool sendMsg(uint8_t* buffer, uint32_t size);
+        bool sendFile(int fileDescriptor, uint32_t size);
         std::pair<uint8_t*, uint32_t> getNextMessage();
 
     private:

@@ -1,0 +1,16 @@
+jstanly@DESKTOP-AO38QGL:~/source/me$ ./dist/bin/MEAutoGenerateClient localhost 8080 8081 1000000 1
+Recv Buff Size: 131072
+Send Buff Size: 2626560
+Encode and Send Orders - Total Time (ms): 1078.000000
+Time Took Send Order - Total Time (ms): 708.000000 Total Qty : 33773340 PerMSAvg : 47702.457627
+Receive Order - Total Time (ms): 1078.000000
+
+
+Encode and Send Orders - Total Time (ms): 972.000000
+Time Took Send Order - Total Time (ms): 607.000000 Total Qty : 33773340 PerMSAvg : 55639.769357
+Receive Order - Total Time (ms): 971.000000
+
+Time Took Send Order - Total Time (ms): 260.000000 Total Qty : 37773348 PerMSAvg : 145282.107692
+Receive Order - Total Time (ms): 621.000000
+
+Worker Received Orders - Total Time (ms): 381.000000 Received Orders Count : 0

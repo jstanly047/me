@@ -7,8 +7,62 @@
 #include <me/book/OrderMatch.h>
 #include <sys/epoll.h>
 #include <me/utility/TimerClock.h>
+#include <fcntl.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <fstream>
 
-void connectToInput(const char* server, const char* service, long long int size, int numberOfSymbol)
+uint32_t writeToFile(std::unique_ptr<me::book::Order>& order, std::ofstream& fd)
+{
+    auto encodeBuffer = order->encode();
+    uint32_t networkByteOrderMsgBytesSize = htonl(encodeBuffer.second);
+    fd.write(reinterpret_cast<const char*>(&networkByteOrderMsgBytesSize), sizeof(uint32_t));
+    fd.write(reinterpret_cast<const char*>(encodeBuffer.first), encodeBuffer.second);
+    return (encodeBuffer.second + sizeof(uint32_t));
+}
+
+size_t generateOrderInFile(int size, int numberOfSymbol)
+{
+    
+
+    std::ofstream outfile("order.bin", std::ios::out | std::ios::binary |std::ios::trunc);
+    std::vector<std::string> symbols;
+    symbols.reserve(numberOfSymbol);
+
+    for (int i = 0; i < numberOfSymbol ; i++)
+    {
+        symbols.push_back("SYM" + std::to_string(i));
+    }
+
+    size_t totalBytes = 0;
+    for (long long int i =0; i < size; i++)
+    {
+        bool isBuy = (i % 2) == 0;
+        unsigned int delta = isBuy ? 1880 : 1884;
+        double price = (std::rand() % 10) + delta;
+        unsigned long long qty = ((std::rand() % 10) + 1) * 100;
+        int symbolIdex = std::rand() % numberOfSymbol;
+        //auto order = new me::book::Order(i, isBuy,"OID" + std::to_string(i), symbols[symbolIdex], price, qty);
+        auto order = std::make_unique<me::book::Order>(i, isBuy,"OID" + std::to_string(i), symbols[symbolIdex], price, qty);
+        totalBytes += writeToFile(order, outfile);
+    }
+
+    auto order = std::make_unique<me::book::Order>(size + 1, me::book::Order::BUY,"END1", "END", 1.0, 1);
+    totalBytes += writeToFile(order, outfile);
+
+    order = std::make_unique<me::book::Order>(size + 2, me::book::Order::SELL,"END2", "END", 1.0, 1);
+    totalBytes += writeToFile(order, outfile);
+
+    /*off_t offset = lseek(fd, 0, SEEK_SET);
+    if (offset == -1) {
+        DieWithSystemMessage("Seek reset failed");
+    }*/
+    outfile.flush();
+    outfile.close();
+    return totalBytes;
+}
+
+void connectToInput(const char* server, const char* service, int totalBytes)
 {
     me::socket::ConnectSocket connectSocket(server, service);
     connectSocket.setBufferTCPSendData();
@@ -18,64 +72,24 @@ void connectToInput(const char* server, const char* service, long long int size,
         DieWithUserMessage("SetupTCPClientSocket() failed", "unable to connect");
     }
 
-    std::vector<std::string> symbols;
-    symbols.reserve(numberOfSymbol);
-
-    for (int i = 0; i < numberOfSymbol ; i++)
-    {
-        symbols.push_back("SYM" + std::to_string(i));
-    }
-
     std::cout << "Send Buff Size: " << connectSocket.getSendBufferSize() << std::endl;
 
-    me::utility::TimerClock totalTime("Encode and Send Orders");
     me::utility::AccumulateAndAverage sendTime("Time Took Send Order");
-    std::vector<std::unique_ptr<me::book::Order>> orders;
-    orders.reserve(size);
-    totalTime.begin();
-    for (long long int i =0; i < size; i++)
-    {
-        bool isBuy = (i % 2) == 0;
-        unsigned int delta = isBuy ? 1880 : 1884;
-        double price = (std::rand() % 10) + delta;
-        unsigned long long qty = ((std::rand() % 10) + 1) * 100;
-        int symbolIdex = std::rand() % numberOfSymbol;
-        //auto order = new me::book::Order(i, isBuy,"OID" + std::to_string(i), symbols[symbolIdex], price, qty);
-        orders.push_back(std::make_unique<me::book::Order>(i, isBuy,"OID" + std::to_string(i), symbols[symbolIdex], price, qty));
-    }
 
-    for (auto &order : orders)
-    {
-        auto encodeBuffer = order->encode();
-        sendTime.begin();
-
-        if (connectSocket.sendMsg(encodeBuffer.first, encodeBuffer.second) == false)
-        {
-            DieWithSystemMessage("send() failed");
-        }
-        sendTime.end(encodeBuffer.second);
-    }
-
-    auto order = std::make_unique<me::book::Order>(size + 1, me::book::Order::BUY,"END1", "END", 1.0, 1);
-    auto encodeBuffer = order->encode();
     sendTime.begin();
-    if (connectSocket.sendMsg(encodeBuffer.first, encodeBuffer.second) == false)
-    {
-        DieWithSystemMessage("send() failed");
-    }
-    sendTime.end(encodeBuffer.second);
 
-    order = std::make_unique<me::book::Order>(size + 2, me::book::Order::SELL,"END2", "END", 1.0, 1);
-    encodeBuffer = order->encode();
-    sendTime.begin();
-    if (connectSocket.sendMsg(encodeBuffer.first, encodeBuffer.second) == false)
-    {
-        DieWithSystemMessage("send() failed");
-    }
-    sendTime.end(encodeBuffer.second);
-    totalTime.end();
+    int fd = open("order.bin", O_RDONLY,  S_IRUSR | S_IWUSR);
 
-    std::cout << totalTime.getStatInMilliSec() << std::endl;
+    if (fd == -1)
+    {
+         DieWithSystemMessage("Failed to open file");
+    }
+
+    if (connectSocket.sendFile(fd, totalBytes) == false)
+    {
+        DieWithSystemMessage("Can not send file");
+    }
+    sendTime.end(totalBytes);    
     std::cout << sendTime.getStatInMilliSec() << std::endl;
 
     std::string exitStr;
@@ -157,8 +171,9 @@ int main(int argc, char *argv[])
         DieWithUserMessage("Parameter(s)", "<In Server Address/Name> <In Server Port/Service> <Out Server Port/Service> <Number of Orders> <Number Of Symbol>");
     }
 
+    auto totalBytes = generateOrderInFile(atoll(argv[4]), atoi(argv[5]));
     std::thread t1(connectToOutput, argv[1], argv[3]);
-    std::thread t2(connectToInput, argv[1], argv[2], atoll(argv[4]), atoi(argv[5]));
+    std::thread t2(connectToInput, argv[1], argv[2], totalBytes);
     t1.join();
     t2.join();
     

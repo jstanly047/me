@@ -9,7 +9,9 @@ using namespace me::handle;
 void OrderProcess::onMsg(void* msg)
 {
     auto order = reinterpret_cast<me::book::Order*>(msg);
-    
+    //m_count++;
+
+    //std::cout << " Received Order : " <<  order->toString() << std::endl;
 
     if (order->getSequence() == 1)
     {
@@ -18,7 +20,7 @@ void OrderProcess::onMsg(void* msg)
     else if (order->getID() == "END2")
     {
         m_totalTime.end();
-        std::cout << m_totalTime.getStatInMilliSec() << std::endl;
+        std::cout << m_totalTime.getStatInMilliSec()  << " Received Orders Count : " <<  m_count << std::endl;
     }
 
     auto orderBook = m_orderBooks[order->getSymbol()];
