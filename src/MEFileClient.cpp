@@ -16,7 +16,6 @@ void sendOrdersFromFile(me::socket::ConnectSocket& connectSocket, const std::str
     {
         auto order = std::make_unique<me::book::Order>(i++, row[0] == "BUY", row[1], row[2], std::stod(row[3]), std::stoull(row[4]));
         auto encodeBuffer = order->encode();
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
         if (connectSocket.sendMsg(encodeBuffer.first, encodeBuffer.second) == false)
         {

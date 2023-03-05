@@ -60,6 +60,7 @@ void ServerThread::start(const std::string& service)
 
                 auto dataSocket = serverSocket.acceptDataSocket();
                 dataSocket->registerEpoll(epollFd);
+                std::cout << "Rcv Buff Size: " << dataSocket->getRcvBufferSize() << std::endl;
             }
             else
             {

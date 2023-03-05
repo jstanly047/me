@@ -4,10 +4,12 @@
 #include <string>
 class Person;
 
+
 namespace me{ namespace socket
 {
     class DataSocket : public BaseSocket
     {
+        constexpr static int RECEIVE_BUFF_SIZE = 128 * 1024;
     public:
         DataSocket(int socketID);
 
@@ -15,12 +17,13 @@ namespace me{ namespace socket
         std::pair<uint8_t*, uint32_t> getNextMessage();
 
     private:
-        uint32_t m_networkByteOrderMsgBytesSize = 0;
-        uint32_t m_receivedSizeDataCount = 0;
-        bool m_isSizeDataRead = false;
+        inline void updateForDataRead(uint32_t size);
         
-        uint32_t m_receivedMsgDataCount = 0;
         uint32_t m_expectedMsgSize = 0;
-        uint8_t m_msgBuffer[120];
+        uint32_t m_numberOfBytesInBuffer = 0;
+        uint32_t m_readOffset = 0;
+        uint32_t m_numberOfBytesLeftToRead = 0;
+        uint32_t m_numberOfBytesLeftToRecv = RECEIVE_BUFF_SIZE;
+        uint8_t m_recvBuffer[RECEIVE_BUFF_SIZE];
     };
 }}

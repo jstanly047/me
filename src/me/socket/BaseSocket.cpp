@@ -197,13 +197,21 @@ bool BaseSocket::setDataFlushTimeoutOnClose(int waitTimeInSec)
 
 bool BaseSocket::setBufferTCPSendData()
 {
-    int bufferSendData = 1;
+    /*int bufferSendData = 1;
     if (setsockopt(m_socketId, SOL_SOCKET, TCP_CORK, &bufferSendData, sizeof(bufferSendData)) == -1) 
     {
         return false;
     }
 
-    return true;
+    return true;*/
+
+    int flag = 0;
+    if (setsockopt(m_socketId, SOL_SOCKET, TCP_NODELAY, &flag, sizeof(flag)) == -1) 
+    {
+        return false;
+    }
+    
+    return true  ;
 }
 
 bool BaseSocket::setMaxSendDataWaitThreshold(int numberOfBytes)

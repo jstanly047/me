@@ -82,6 +82,7 @@ void AccumulatorThread::handleEpollEvent()
                 }
 
                 auto dataSocket = m_serverSocket->acceptDataSocket();
+                std::cout << "Send Buff Size: " << dataSocket->getSendBufferSize() << std::endl;
                 sendToClient(*dataSocket);
             }
             else

@@ -11,6 +11,7 @@
 void connectToInput(const char* server, const char* service, long long int size, int numberOfSymbol)
 {
     me::socket::ConnectSocket connectSocket(server, service);
+    connectSocket.setBufferTCPSendData();
 
     if (connectSocket.connectToTCP() == false)
     {
@@ -25,8 +26,12 @@ void connectToInput(const char* server, const char* service, long long int size,
         symbols.push_back("SYM" + std::to_string(i));
     }
 
+    std::cout << "Send Buff Size: " << connectSocket.getSendBufferSize() << std::endl;
+
     me::utility::TimerClock totalTime("Encode and Send Orders");
     me::utility::AccumulateAndAverage sendTime("Time Took Send Order");
+    std::vector<std::unique_ptr<me::book::Order>> orders;
+    orders.reserve(size);
     totalTime.begin();
     for (long long int i =0; i < size; i++)
     {
@@ -36,7 +41,11 @@ void connectToInput(const char* server, const char* service, long long int size,
         unsigned long long qty = ((std::rand() % 10) + 1) * 100;
         int symbolIdex = std::rand() % numberOfSymbol;
         //auto order = new me::book::Order(i, isBuy,"OID" + std::to_string(i), symbols[symbolIdex], price, qty);
-        auto order = std::make_unique<me::book::Order>(i, isBuy,"OID" + std::to_string(i), symbols[symbolIdex], price, qty);
+        orders.push_back(std::make_unique<me::book::Order>(i, isBuy,"OID" + std::to_string(i), symbols[symbolIdex], price, qty));
+    }
+
+    for (auto &order : orders)
+    {
         auto encodeBuffer = order->encode();
         sendTime.begin();
 
@@ -95,6 +104,7 @@ void connectToOutput(const char* server, const char* service)
     }
 
     std::array<struct epoll_event, 1> events;
+    std::cout << "Recv Buff Size: " << connectSocket.getRcvBufferSize() << std::endl;
 
     me::utility::TimerClock receiveTime("Receive Order");
     receiveTime.begin();

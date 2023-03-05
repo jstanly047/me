@@ -22,6 +22,7 @@ void OrderProcess::onMsg(void* msg)
     }
 
     auto orderBook = m_orderBooks[order->getSymbol()];
+    //std::cout << "Received Order " << order->getID() << std::endl;
 
     if (orderBook == nullptr)
     {
